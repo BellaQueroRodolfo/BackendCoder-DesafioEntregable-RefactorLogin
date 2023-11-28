@@ -1,0 +1,16 @@
+{
+    "name": "plant-app",
+    "version": "1",
+    "description": "Coder Primera Entrega",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "keywords": ["e-commerce", "plant", "product", "cart"],
+    "author": "Rodolfo Bella Quero",
+    "license": "MIT",
+    "dependencies": {
+      "express": "^4.17.1"
+    }
+  }
+  

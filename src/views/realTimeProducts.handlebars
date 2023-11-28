@@ -1,0 +1,14 @@
+{{#extends 'layouts/main'}}
+{{#content 'body'}}
+    <h1>Real-Time Plant Products</h1>
+    <form id="productForm">
+        <input type="text" id="productName" placeholder="Product Name">
+        <input type="number" id="productPrice" placeholder="Product Price">
+        <button type="submit">Add Product</button>
+    </form>
+    <ul id="productList">
+    </ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+{{/content}}

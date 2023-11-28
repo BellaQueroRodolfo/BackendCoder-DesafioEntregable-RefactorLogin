@@ -1,0 +1,28 @@
+[
+    {
+      "id": "CART-1632291603256",
+      "products": [
+        {
+          "product": "PRODUCT-1632291634453",
+          "quantity": 2
+        },
+        {
+          "product": "PRODUCT-1632291639534",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "id": "CART-1632291610612",
+      "products": [
+        {
+          "product": "PRODUCT-1632291644372",
+          "quantity": 3
+        },
+        {
+          "product": "PRODUCT-1632291650014",
+          "quantity": 2
+        }
+      ]
+    }
+  ]
