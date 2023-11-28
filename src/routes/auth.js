@@ -1,36 +1,31 @@
 const express = require('express');
-const passport = require('passport');
-const User = require('../models/User');
 const router = express.Router();
+const passport = require('passport');
+const bcrypt = require('bcrypt');
+const User = require('../models/User');
 
-router.get('/register', (req, res) => {
-  res.render('register', { layout: 'main' });
+router.post('/register', async (req, res) => {
+  try {
+    const { username, password, role } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, password: hashedPassword, role });
+    await user.save();
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Registration failed' });
+  }
 });
 
-router.post('/register', (req, res) => {
-  const { email, password } = req.body;
-  User.register(new User({ email }), password, (err, user) => {
-    if (err) {
-      console.error('Error registering user:', err);
-      return res.redirect('/auth/register');
-    }
-    passport.authenticate('local')(req, res, () => {
-      res.redirect('/products');
-    });
-  });
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  res.status(200).json({ message: 'Login successful' });
 });
-
-router.get('/login', (req, res) => {
-  res.render('login', { layout: 'main' });
-});
-
-router.post('/login', passport.authenticate('local', {
-  successRedirect: '/products',
-  failureRedirect: '/auth/login',
-}), (req, res) => {});
-router.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/auth/login');
-});
+router.get('/github', passport.authenticate('github'));
+router.get(
+  '/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/products');
+  }
+);
 
 module.exports = router;
