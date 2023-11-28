@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+</head>
+<body>
+    <h1>Welcome, {{user.username}} ({{user.role}})</h1>
+    <!-- Rest of your product list content here -->
+    <ul>
+        {{#each products}}
+            <li>
+                {{this.title}} - Price: ${{this.price}}
+                <a href="/products/{{this.product}}">View Details</a>
+                <button onclick="addToCart('{{this.product}}')">Add to Cart</button>
+            </li>
+        {{/each}}
+    </ul>
+
+    <script>
+    </script>
+</body>
+</html>
