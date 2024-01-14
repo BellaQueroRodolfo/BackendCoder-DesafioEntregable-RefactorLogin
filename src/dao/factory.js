@@ -1,9 +1,11 @@
-const ProductDAO = require('./models/ProductDAO');
-const CartDAO = require('./models/CartDAO');
-const UserDAO = require('./models/UserDAO');
+const { PremiumUserDAO, UserDAO } = require('./dao');
 
-function dbFactory() {
-  return { ProductDAO, CartDAO, UserDAO };
-}
+const getDAO = (type) => {
+  if (type === 'premium') {
+    return new PremiumUserDAO();
+  } else {
+    return new UserDAO();
+  }
+};
 
-module.exports = dbFactory;
+module.exports = { getDAO };
