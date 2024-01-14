@@ -5,9 +5,25 @@ const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github').Strategy;
 const session = require('express-session');
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const app = express();
 const port = 8080;
 const User = require('./src/models/User');
+
+mongoose.connect('mongodb+srv://<username>:<password>@cluster.mongodb.net/ecommerce', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+
+db.on('error', (error) => {
+  console.error('MongoDB connection error:', error);
+});
+
+db.once('open', () => {
+  console.log('Connected to MongoDB');
+});
 
 passport.use(
   new LocalStrategy((username, password, done) => {
@@ -37,7 +53,6 @@ passport.use(
       callbackURL: 'http://localhost:8080/auth/github/callback',
     },
     (accessToken, refreshToken, profile, done) => {
-      
       User.findOne({ username: profile.username }, (err, user) => {
         if (err) {
           return done(err);
@@ -86,5 +101,3 @@ app.use(passport.session());
 const authRouter = require('./src/routes/auth');
 
 app.use('/auth', authRouter);
-
-
