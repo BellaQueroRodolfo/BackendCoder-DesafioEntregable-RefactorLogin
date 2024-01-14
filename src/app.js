@@ -7,29 +7,33 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const mockingModule = require('./src/mockingModule');
 const customErrorDictionary = require('./src/customErrorDictionary');
-const winston = require('winston');
+const { getLogger } = require('./src/logger');
+const { UserDAO, PremiumUserDAO } = require('./src/dao/factory');
+const UserDTO = require('./src/dao/dto/UserDTO');
+const { PremiumUserDTO } = require('./src/dao/dto/PremiumUserDTO');
 
-const levels = {
-  debug: 0,
-  http: 1,
-  info: 2,
-  warning: 3,
-  error: 4,
-  fatal: 5,
-};
+const logger = getLogger();
 
-const logger = winston.createLogger({
-  levels: levels,
-  format: winston.format.simple(),
-  transports: [
-    new winston.transports.Console({ level: 'debug' }),
-    new winston.transports.File({ filename: 'errors.log', level: 'error' }),
-  ],
+mongoose.Promise = global.Promise;
+
+mongoose.connect('mongodb+srv://<username>:<password>@cluster.mongodb.net/ecommerce', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+
+db.on('error', (error) => {
+  logger.error('MongoDB connection error:', error);
+});
+
+db.once('open', () => {
+  logger.info('Connected to MongoDB');
 });
 
 passport.use(
   new LocalStrategy((username, password, done) => {
-    User.findOne({ username }, (err, user) => {
+    UserDAO.findOne({ username }, (err, user) => {
       if (err) {
         return done(err);
       }
@@ -55,12 +59,12 @@ passport.use(
       callbackURL: 'http://localhost:8080/auth/github/callback',
     },
     (accessToken, refreshToken, profile, done) => {
-      User.findOne({ username: profile.username }, (err, user) => {
+      UserDAO.findOne({ username: profile.username }, (err, user) => {
         if (err) {
           return done(err);
         }
         if (!user) {
-          const newUser = new User({
+          const newUser = new UserDAO({
             username: profile.username,
             password: 'generated-password',
             role: 'user',
@@ -84,33 +88,12 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-  User.findById(id, (err, user) => {
+  UserDAO.findById(id, (err, user) => {
     done(err, user);
   });
 });
 
 const app = express();
-
-app.engine('handlebars', exphbs());
-app.set('view engine', 'handlebars');
-
-app.use(express.static('public'));
-
-mongoose.connect('mongodb+srv://<username>:<password>@cluster.mongodb.net/ecommerce', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-const db = mongoose.connection;
-
-db.on('error', (error) => {
-  console.error('MongoDB connection error:', error);
-});
-
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
-
 app.use(express.json());
 app.use(
   session({
@@ -122,9 +105,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-const authRouter = require('./src/routes/auth');
-
-app.use('/auth', authRouter);
+app.engine('handlebars', exphbs());
+app.set('view engine', 'handlebars');
 
 app.get('/mockingproducts', (req, res) => {
   const mockedProducts = mockingModule.generateMockProducts();
@@ -134,18 +116,43 @@ app.get('/mockingproducts', (req, res) => {
 app.use((err, req, res, next) => {
   const status = err.status || 500;
   const message = customErrorDictionary[err.type] || 'Internal Server Error';
+  logger.error(`Error: ${message}`);
   res.status(status).json({ error: message });
-  logger.error(`[${status}] ${err.message}`);
 });
 
-app.get('/loggerTest', (req, res) => {
-  logger.debug('Debug message');
-  logger.http('HTTP message');
-  logger.info('Info message');
-  logger.warning('Warning message');
-  logger.error('Error message');
-  logger.fatal('Fatal message');
-  res.status(200).send('Logger test successful');
-});
+const authRouter = require('./src/routes/auth');
+app.use('/auth', authRouter);
 
-module.exports = app;
+const userRouter = require('./src/routes/user');
+app.use('/api/users', userRouter);
+
+const productRouter = require('./src/routes/product');
+app.use('/api/products', productRouter);
+
+const cartRouter = require('./src/routes/cart');
+app.use('/api/carts', cartRouter);
+
+const ticketRouter = require('./src/routes/ticket');
+app.use('/api/tickets', ticketRouter);
+
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'E-commerce API',
+      version: '1.0.0',
+    },
+  },
+  apis: ['./src/routes/*.js'],
+};
+
+const specs = swaggerJsDoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  logger.info(`Server is running on port ${port}`);
+});
