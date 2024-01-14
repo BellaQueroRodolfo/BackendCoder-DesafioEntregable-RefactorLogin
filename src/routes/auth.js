@@ -10,4 +10,10 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   res.status(200).json({ user: userDTO });
 });
 
-// ... (other routes remain the same)
+router.get('/profile', (req, res) => {
+});
+
+router.put('/update', (req, res) => {
+});
+
+module.exports = router;
