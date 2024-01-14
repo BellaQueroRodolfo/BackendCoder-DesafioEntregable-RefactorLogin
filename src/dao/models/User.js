@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -13,6 +14,11 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     default: 'user',
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
   },
 });
 
