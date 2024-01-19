@@ -1,16 +1,23 @@
 {
-    "name": "plant-app",
-    "version": "1",
-    "description": "Coder Primera Entrega",
-    "main": "app.js",
-    "scripts": {
-      "start": "node app.js"
-    },
-    "keywords": ["e-commerce", "plant", "product", "cart"],
-    "author": "Rodolfo Bella Quero",
-    "license": "MIT",
-    "dependencies": {
-      "express": "^4.17.1"
-    }
+  "name": "plant-app",
+  "version": "1.0.0",
+  "description": "Coder Primera Entrega",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": ["e-commerce", "plant", "product", "cart"],
+  "author": "Rodolfo Bella Quero",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-handlebars": "^5.3.4",
+    "mongoose": "^5.13.7",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "passport-github": "^0.4.2",
+    "express-session": "^1.17.2",
+    "bcrypt": "^5.0.1",
+    "socket.io": "^4.0.1"
   }
-  
+}
